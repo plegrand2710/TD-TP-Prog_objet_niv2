@@ -1,6 +1,8 @@
 package carnetAdresse;
 
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
@@ -13,6 +15,11 @@ public class CarnetAdresses extends JFrame {
     private int currentMiniatureIndex;
     private JLabel photoLabel; 
     private ImageIcon[] photos; 
+    private JTextField numberField;     
+    private JMenuItem menuNouv, menuSupp, menuSave;
+
+
+
 
     public CarnetAdresses() {
         annuaire = new Annuaire();
@@ -24,7 +31,17 @@ public class CarnetAdresses extends JFrame {
         setSize(800, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+        
+        JMenu menuEdit = new JMenu("Edit");
+        menuEdit.add(this.menuSave = new JMenuItem("Enregistrer"));
+        menuEdit.add(this.menuSupp = new JMenuItem("Supprimer"));
+        menuEdit.add(this.menuNouv = new JMenuItem("Nouveau"));
 
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.add(menuEdit);
+
+        setJMenuBar(menuBar);
+        
         slider = new JSlider(JSlider.VERTICAL, 0, 0, 0);
         slider.setInverted(true); 
         slider.addChangeListener(e -> showContact(slider.getValue()));
@@ -47,11 +64,17 @@ public class CarnetAdresses extends JFrame {
 
         this.add(photoPanel, BorderLayout.NORTH);
 
-        JPanel formPanel = new JPanel(new GridLayout(8, 2));
+        JPanel formPanel = new JPanel(new GridLayout(9, 2, 5, 5));
+        
+        formPanel.add(new JLabel("Numéro :"));
+        numberField = new JTextField();
+        numberField.setEditable(false);
+        formPanel.add(numberField);
+
         String[] labels = {"Nom", "Prénom", "Téléphone", "Adresse", "Code Postal", "Email", "Métier", "Situation"};
-        for (int i = 0; i < fields.length; i++) {
+        for (int i = 0; i < labels.length; i++) {
             formPanel.add(new JLabel(labels[i] + ":"));
-            fields[i] = new JTextField(20);
+            fields[i] = new JTextField();
             formPanel.add(fields[i]);
         }
         add(formPanel, BorderLayout.CENTER);
@@ -84,7 +107,7 @@ public class CarnetAdresses extends JFrame {
         startBtn.addActionListener(e -> {
             saveCurrentContact();
             if (annuaire.getTaille() > 0) {
-                showContact(0); // Affiche le premier contact
+                showContact(0); 
             } else {
                 JOptionPane.showMessageDialog(this, "Aucun contact à afficher.", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -93,7 +116,7 @@ public class CarnetAdresses extends JFrame {
         prevBtn.addActionListener(e -> {
             saveCurrentContact();
             if (currentIndex > 0) {
-                showContact(currentIndex - 1); // Affiche le contact précédent
+                showContact(currentIndex - 1);
             } else {
                 JOptionPane.showMessageDialog(this, "Vous êtes déjà au premier contact.", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -102,7 +125,7 @@ public class CarnetAdresses extends JFrame {
         nextBtn.addActionListener(e -> {
             saveCurrentContact();
             if (currentIndex < annuaire.getTaille() - 1) {
-                showContact(currentIndex + 1); // Affiche le contact suivant
+                showContact(currentIndex + 1); 
             } else {
                 JOptionPane.showMessageDialog(this, "Vous êtes déjà au dernier contact.", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -111,7 +134,7 @@ public class CarnetAdresses extends JFrame {
         endBtn.addActionListener(e -> {
             saveCurrentContact();
             if (annuaire.getTaille() > 0) {
-                showContact(annuaire.getTaille() - 1); // Affiche le dernier contact
+                showContact(annuaire.getTaille() - 1); 
             } else {
                 JOptionPane.showMessageDialog(this, "Aucun contact à afficher.", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -120,7 +143,7 @@ public class CarnetAdresses extends JFrame {
         midBtn.addActionListener(e -> {
             saveCurrentContact();
             if (annuaire.getTaille() > 0) {
-                showContact(annuaire.getTaille() / 2); // Affiche le contact du milieu
+                showContact(annuaire.getTaille() / 2); 
             } else {
                 JOptionPane.showMessageDialog(this, "Aucun contact à afficher.", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -154,6 +177,22 @@ public class CarnetAdresses extends JFrame {
         prevImageBtn.addActionListener(e -> changeMiniature(-1));
         nextImageBtn.addActionListener(e -> changeMiniature(1));
 
+        menuSave.addActionListener(e -> {
+            saveContact();
+            JOptionPane.showMessageDialog(this, "Contact sauvegardé avec succès.", "Succès", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        menuSupp.addActionListener(e -> {
+            saveCurrentContact();
+            deleteContact();
+        });
+
+        menuNouv.addActionListener(e -> {
+            saveCurrentContact();
+            createNewContact();
+        });
+
+        
         try {
             annuaire.charger("contacts.txt");
             updateSlider();
@@ -176,10 +215,9 @@ public class CarnetAdresses extends JFrame {
 
     private void showContact(int index) {
         if (index >= 0 && index < annuaire.getTaille()) {
-            //updateAnnuaireFromForm();
-
             currentIndex = index;
             Contact c = annuaire.getContact(index);
+            numberField.setText(String.valueOf(index + 1));
             fields[0].setText(c.get_nom());
             fields[1].setText(c.get_prenom());
             fields[2].setText(c.get_tel());
@@ -191,11 +229,13 @@ public class CarnetAdresses extends JFrame {
             currentMiniatureIndex = c.get_miniature();
             updateMiniature();
             slider.setValue(index);
+
         } else {
             clearForm(); 
+            numberField.setText("");
+
         }
     }
-
 
     
     private void updateAnnuaireFromForm() {
@@ -256,7 +296,7 @@ public class CarnetAdresses extends JFrame {
     private void goToNthContact() {
         String input = JOptionPane.showInputDialog(this, "Entrez le numéro du contact (1-" + annuaire.getTaille() + "):");
         try {
-            int index = Integer.parseInt(input) - 1; // L'utilisateur entre un numéro, pas un index
+            int index = Integer.parseInt(input) - 1;
             if (index >= 0 && index < annuaire.getTaille()) {
                 showContact(index);
             } else {
@@ -290,17 +330,27 @@ public class CarnetAdresses extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new CarnetAdresses().setVisible(true));
     }
-    
+
+
     private void createNewContact() {
         Contact newContact = new Contact("", "", "", "", "", "", "", "", 0);
 
         annuaire.ajouter(newContact);
 
-        currentIndex = annuaire.getTaille();
+        currentIndex = annuaire.getTaille() - 1;
+        System.out.println("Nouveau contact créé à l'index : " + currentIndex);
 
-        clearForm();
-        slider.setValue(currentIndex);
-        updateSlider();
+        for (ChangeListener listener : slider.getChangeListeners()) {
+            slider.removeChangeListener(listener);
+        }
+
+        slider.setMaximum(annuaire.getTaille() - 1); 
+        slider.setValue(currentIndex); 
+
+        slider.addChangeListener(e -> showContact(slider.getValue()));
+
+        showContact(currentIndex);
+        System.out.println("Slider mis à jour sur l'index : " + slider.getValue());
     }
 
 
