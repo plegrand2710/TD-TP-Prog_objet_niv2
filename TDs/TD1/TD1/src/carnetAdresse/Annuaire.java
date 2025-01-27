@@ -1,109 +1,60 @@
 package carnetAdresse;
 
 import java.util.ArrayList;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 
 public class Annuaire {
-
-    private int num = 0;
-    private ArrayList<ContactIni> liste;
-
-    public ArrayList<ContactIni> get_liste() {
-        return this.liste;
-    }
-
-    public void set_liste(ArrayList<ContactIni> a) {
-        this.liste = a;
-    }
-
-    public int get_num() {
-        return num;
-    }
-
-    public void set_num(int i) {
-        num = i;
-    }
-
-    public void inc_num() {
-        num++;
-    }
-
-    public void dec_num() {
-        num--;
-    }
+    private ArrayList<Contact> liste;
 
     public Annuaire() {
-        set_liste(new ArrayList<ContactIni>());
+        this.liste = new ArrayList<>();
     }
 
-    public void ajout(ContactIni c) {
-        get_liste().add(c);
-        inc_num();
+    public void ajouter(Contact contact) {
+        liste.add(contact);
     }
 
-    public void supprimer(int i, String filePath) {
-        get_liste().remove(i);
-        dec_num();
-        this.sauvegarder(filePath);
-    }
-
-    public void ecritureContact(String filePath, ContactIni ctt) {
-        try (FileOutputStream fichier = new FileOutputStream(filePath, true)) {
-            fichier.write(ctt.toString().getBytes());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void supprimer(int index) {
+        if (index >= 0 && index < liste.size()) {
+            liste.remove(index);
         }
     }
 
-    public void sauvegarder(String filePath) {
-        try (FileOutputStream fichier = new FileOutputStream(filePath)) {
-            for (int i = 0; i < get_num(); i++) {
-                fichier.write(get_liste().get(i).toString().getBytes());
+    public ArrayList<Contact> getListe() {
+        return liste;
+    }
+
+    public Contact getContact(int index) {
+        if (index >= 0 && index < liste.size()) {
+            return liste.get(index);
+        }
+        return null;
+    }
+
+    public int getTaille() {
+        return liste.size();
+    }
+
+    public void sauvegarder(String filePath) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (Contact c : liste) {
+                writer.write(c.toString());
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-    public void lectureContacts(String filePath) {
-        try (FileInputStream fichier = new FileInputStream(filePath);
-             InputStreamReader inputStreamReader = new InputStreamReader(fichier);
-             BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
-
+    public void charger(String filePath) throws IOException {
+        liste.clear();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String ligne;
-            get_liste().clear();
-
-            while ((ligne = bufferedReader.readLine()) != null) {
-                String[] infos = ligne.split(" ; ");
-                if (infos.length == 9) {
-                    String nom = infos[0];
-                    String prenom = infos[1];
-                    String tel = infos[2];
-                    String adresse = infos[3];
-                    String cp = infos[4];
-                    String email = infos[5];
-                    String metier = infos[6];
-                    String situation = infos[7];
-                    int miniature = Integer.parseInt(infos[8]);
-                    ContactIni temp = new ContactIni(nom, prenom, tel, adresse, cp, email, situation, metier, miniature);
-                    this.ajout(temp);
+            while ((ligne = reader.readLine()) != null) {
+            	this.getTaille();
+                String[] data = ligne.split(" ; ");
+                if (data.length == 9) {
+                    Contact c = new Contact(data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], Integer.parseInt(data[8]));
+                    ajouter(c);
                 }
             }
-            this.set_num(this.get_liste().size());
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }

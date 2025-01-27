@@ -1,6 +1,6 @@
 package carnetAdresse;
 
-public class ContactIni {
+public class Contact {
 
     private int numC ;
     private String nom ;
@@ -35,8 +35,8 @@ public class ContactIni {
     public void set_miniature(int i) { this.miniature = i ; }
 
 
-    ContactIni(){}
-    ContactIni(String nom, String prenom, String tel, String adresse, String cp, String email, String metier, String situation, int miniature){
+    Contact(){}
+    Contact(String nom, String prenom, String tel, String adresse, String cp, String email, String metier, String situation, int miniature){
         set_nom(nom);
         set_prenom(prenom);
         set_tel(tel);
