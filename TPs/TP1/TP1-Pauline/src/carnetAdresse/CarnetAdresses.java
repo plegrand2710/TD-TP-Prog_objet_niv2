@@ -2,7 +2,6 @@ package carnetAdresse;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.IOException;
 
 public class CarnetAdresses extends JFrame {
@@ -11,13 +10,10 @@ public class CarnetAdresses extends JFrame {
     private int currentIndex;
     private ImageIcon[] photos;
     private int currentMiniatureIndex;
-    private JMenuItem menuNouv, menuSupp, menuSave;
     private JSlider slider;
     private JTextField[] fields;
     private JTextField numberField;     
     private JLabel photoLabel; 
-
-
 
 
     public CarnetAdresses() {
@@ -77,9 +73,12 @@ public class CarnetAdresses extends JFrame {
 
     private void createTab(Contact contact, int index) {
     	
-        slider = new JSlider(JSlider.VERTICAL, 0, 0, 0);
-        slider.setInverted(true); 
-        slider.addChangeListener(e -> showContact(slider.getValue()));
+    	slider = new JSlider(JSlider.VERTICAL, 0, Math.max(0, annuaire.getTaille() - 1), 0);
+    	slider.setInverted(true);
+    	slider.setMajorTickSpacing(1);
+    	slider.setPaintTicks(true);
+    	slider.setSnapToTicks(true);
+
         add(slider, BorderLayout.EAST);
     	
     	JPanel tabPanel = new JPanel(new BorderLayout());
@@ -128,18 +127,7 @@ public class CarnetAdresses extends JFrame {
         tabFields[7].setText(contact.get_situation());
 
         tabPanel.add(formPanel, BorderLayout.CENTER);
-        
-        JPanel customTab = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10)); // Marges personnalisées
-        JLabel tabLabel = new JLabel("Contact " + (index + 1), photos[contact.get_miniature()], JLabel.LEFT);
-        tabLabel.setFont(new Font("Arial", Font.BOLD, 14));
-        tabLabel.setIconTextGap(10); // Espace entre l'icône et le texte
-        customTab.add(tabLabel);
-        customTab.setOpaque(false);
-
-        // Ajouter l'onglet avec le composant personnalisé
-        tabbedPane.addTab(null, tabPanel);
-        tabbedPane.setTabComponentAt(index, customTab);
-        
+                
         JPanel bottomPanel = new JPanel(new GridLayout(2, 5, 10, 10));
         JButton startBtn = new JButton("Début");
         JButton prevBtn = new JButton("Précédent");
@@ -164,25 +152,108 @@ public class CarnetAdresses extends JFrame {
         bottomPanel.add(exitBtn);
 
         add(bottomPanel, BorderLayout.SOUTH);
-        
 
         tabbedPane.addTab("Contact " + (index + 1), photos[contact.get_miniature()], tabPanel);
 
-        
-
-        tabbedPane.addChangeListener(e -> {
-            int selectedIndex = tabbedPane.getSelectedIndex();
-            if (selectedIndex == index) {
-                contact.set_nom(tabFields[0].getText());
-                contact.set_prenom(tabFields[1].getText());
-                contact.set_tel(tabFields[2].getText());
-                contact.set_adresse(tabFields[3].getText());
-                contact.set_cp(tabFields[4].getText());
-                contact.set_email(tabFields[5].getText());
-                contact.set_metier(tabFields[6].getText());
-                contact.set_situation(tabFields[7].getText());
+        startBtn.addActionListener(e -> {
+            if (tabbedPane.getTabCount() > 0) {
+                tabbedPane.setSelectedIndex(0);
+            } else {
+                JOptionPane.showMessageDialog(this, "Aucun contact à afficher.", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         });
+
+        prevBtn.addActionListener(e -> {
+            int currentTab = tabbedPane.getSelectedIndex();
+            if (currentTab > 0) {
+                tabbedPane.setSelectedIndex(currentTab - 1); 
+            } else {
+                JOptionPane.showMessageDialog(this, "Vous êtes déjà au premier contact.", "Information", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        nextBtn.addActionListener(e -> {
+            int currentTab = tabbedPane.getSelectedIndex();
+            if (currentTab < tabbedPane.getTabCount() - 1) {
+                tabbedPane.setSelectedIndex(currentTab + 1); 
+            } else {
+                JOptionPane.showMessageDialog(this, "Vous êtes déjà au dernier contact.", "Information", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        endBtn.addActionListener(e -> {
+            if (tabbedPane.getTabCount() > 0) {
+                tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1); 
+            } else {
+                JOptionPane.showMessageDialog(this, "Aucun contact à afficher.", "Information", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        midBtn.addActionListener(e -> {
+            if (tabbedPane.getTabCount() > 0) {
+                tabbedPane.setSelectedIndex(tabbedPane.getTabCount() / 2); 
+            } else {
+                JOptionPane.showMessageDialog(this, "Aucun contact à afficher.", "Information", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        nthBtn.addActionListener(e -> {
+            String input = JOptionPane.showInputDialog(this, "Entrez le numéro du contact (1-" + tabbedPane.getTabCount() + "):");
+            try {
+                int i = Integer.parseInt(input) - 1;
+                if (i >= 0 && i < tabbedPane.getTabCount()) {
+                    tabbedPane.setSelectedIndex(i); 
+                } else {
+                    JOptionPane.showMessageDialog(this, "Index hors des limites. Veuillez entrer un nombre entre 1 et " + tabbedPane.getTabCount() + ".", "Erreur", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Entrée invalide. Veuillez entrer un nombre.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        newBtn.addActionListener(e -> {
+            Contact newContact = new Contact("Nouveau", "Contact", "", "", "", "", "", "", 0);
+            annuaire.ajouter(newContact);
+            createTab(newContact, annuaire.getTaille() - 1);
+            tabbedPane.setSelectedIndex(annuaire.getTaille() - 1);
+        });
+
+        saveBtn.addActionListener(e -> {
+            saveContact();
+        });
+
+        deleteBtn.addActionListener(e -> {
+            int currentTab = tabbedPane.getSelectedIndex();
+            if (currentTab >= 0 && tabbedPane.getTabCount() > 0) {
+                deleteContact();
+                tabbedPane.remove(currentTab);
+                if (tabbedPane.getTabCount() > 0) {
+                    tabbedPane.setSelectedIndex(Math.max(0, currentTab - 1));
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Aucun contact à supprimer.", "Information", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        exitBtn.addActionListener(e -> {
+            System.exit(0);
+        });
+
+        tabbedPane.addChangeListener(e -> {
+        	saveContact();
+            int selectedIndex = tabbedPane.getSelectedIndex();
+            if (selectedIndex >= 0 && selectedIndex < slider.getMaximum() + 1) {
+                slider.setValue(selectedIndex); 
+            }
+        });
+
+        slider.addChangeListener(e -> {
+            int sliderValue = slider.getValue();
+            if (sliderValue >= 0 && sliderValue < tabbedPane.getTabCount() && slider.getValueIsAdjusting()) {
+                tabbedPane.setSelectedIndex(sliderValue); 
+            }
+        });
+
     }
 
 
@@ -209,43 +280,79 @@ public class CarnetAdresses extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(CarnetAdresses::new);
     }
-    
 
-    private void showContact(int index) {
-        if (index >= 0 && index < annuaire.getTaille()) {
-            currentIndex = index;
-            Contact c = annuaire.getContact(index);
-            numberField.setText(String.valueOf(index + 1));
-            fields[0].setText(c.get_nom());
-            fields[1].setText(c.get_prenom());
-            fields[2].setText(c.get_tel());
-            fields[3].setText(c.get_adresse());
-            fields[4].setText(c.get_cp());
-            fields[5].setText(c.get_email());
-            fields[6].setText(c.get_metier());
-            fields[7].setText(c.get_situation());
-            currentMiniatureIndex = c.get_miniature();
-            updateMiniature();
-            slider.setValue(index);
+   
+    private void updateAnnuaireFromForm() {
+        int selectedIndex = tabbedPane.getSelectedIndex();
+        if (selectedIndex >= 0 && selectedIndex < annuaire.getTaille()) {
+            Contact contact = annuaire.getContact(selectedIndex);
 
-        } else {
-            clearForm(); 
-            numberField.setText("");
+            Component tabComponent = tabbedPane.getComponentAt(selectedIndex);
+            if (tabComponent instanceof JPanel) {
+                JPanel tabPanel = (JPanel) tabComponent;
+                Component[] components = tabPanel.getComponents();
 
+                for (Component component : components) {
+                    if (component instanceof JPanel) { 
+                        JPanel formPanel = (JPanel) component;
+                        Component[] formComponents = formPanel.getComponents();
+                        int fieldIndex = 0;
+                        boolean firstTextFieldSkipped = false; 
+
+                        for (Component formComponent : formComponents) {
+                            if (formComponent instanceof JTextField) {
+                                if (!firstTextFieldSkipped) { 
+                                    firstTextFieldSkipped = true;
+                                    continue;
+                                }
+                                
+                                String text = ((JTextField) formComponent).getText().trim();
+                                switch (fieldIndex) {
+                                    case 0 -> contact.set_nom(text);
+                                    case 1 -> contact.set_prenom(text);
+                                    case 2 -> contact.set_tel(text);
+                                    case 3 -> contact.set_adresse(text);
+                                    case 4 -> contact.set_cp(text);
+                                    case 5 -> contact.set_email(text);
+                                    case 6 -> contact.set_metier(text);
+                                    case 7 -> contact.set_situation(text);
+                                }
+                                fieldIndex++;
+                                if (fieldIndex >= 8) break; 
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
-    
-    private void updateMiniature() {
-        photoLabel.setIcon(photos[currentMiniatureIndex]); 
-    }
-    
-    private void clearForm() {
-        for (JTextField field : fields) {
-            field.setText("");
+
+   
+
+    private void saveContact() {
+        try {
+            updateAnnuaireFromForm();
+            annuaire.sauvegarder("contacts.txt");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Erreur lors de la sauvegarde des contacts.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
-        currentMiniatureIndex = 0;
-        updateMiniature();
     }
- 
+
+
+    private void deleteContact() {
+        int selectedIndex = tabbedPane.getSelectedIndex();
+        
+        if (selectedIndex >= 0 && annuaire.getTaille() > 0) {
+            annuaire.supprimer(selectedIndex);
+
+            try {
+                annuaire.sauvegarder("contacts.txt");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Erreur lors de la sauvegarde des contacts.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
 
 }
