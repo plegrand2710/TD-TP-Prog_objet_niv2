@@ -5,6 +5,7 @@ import java.awt.*;
 public class Boule {
     private double x, y;
     private double vx, vy;
+    private Image image;
 
     public Boule(Dimension dim) {
         x = Math.random() * dim.width;
@@ -28,5 +29,13 @@ public class Boule {
 
     public double getY() {
         return y;
+    }
+    
+    public void setImage(Image image) {
+        this.image = image;
+    }
+
+    public Image getImage() {
+        return image;
     }
 }
