@@ -4,6 +4,8 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -17,7 +19,7 @@ public class BoulesApp extends JFrame {
 
     public BoulesApp() {
         setTitle("Boules Paramétrables avec SplitPane");
-        setSize(900, 600);
+        setSize(900, 800);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         JPanel panneauControle = creerPanneauControle();
@@ -26,6 +28,17 @@ public class BoulesApp extends JFrame {
 
         tableModel = new BoulesTableModel(panneauBoules.getBoules());
         tableCoordonnees = new JTable(tableModel);
+        tableCoordonnees.setAutoCreateRowSorter(true);
+        tableCoordonnees.getTableHeader().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) { 
+                    int colonne = tableCoordonnees.columnAtPoint(e.getPoint());
+                    trierBoules(colonne);
+                }
+            }
+        });
+
         JScrollPane scrollTable = new JScrollPane(tableCoordonnees);
 
         JSplitPane splitHorizontal = new JSplitPane(
@@ -41,7 +54,7 @@ public class BoulesApp extends JFrame {
                 splitHorizontal,
                 scrollTable
         );
-        splitVertical.setDividerLocation(400); 
+        splitVertical.setDividerLocation(500); 
         splitVertical.setOneTouchExpandable(true);
 
         add(splitVertical, BorderLayout.CENTER);
@@ -60,6 +73,20 @@ public class BoulesApp extends JFrame {
         }).start();
 
         setVisible(true);
+    }
+
+    private void trierBoules(int colonne) {
+        if (colonne == 0 || colonne == 1) {
+            panneauBoules.getBoules().sort((b1, b2) -> {
+                if (colonne == 0) { 
+                    return Double.compare(b1.getX(), b2.getX());
+                } else { 
+                    return Double.compare(b1.getY(), b2.getY());
+                }
+            });
+
+            tableModel.fireTableDataChanged();
+        }
     }
 
     
