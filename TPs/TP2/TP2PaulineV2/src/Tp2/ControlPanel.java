@@ -8,6 +8,7 @@ import java.util.Hashtable;
 public class ControlPanel extends JPanel {
     public ControlPanel(BoulesController controller) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+       
 
         JSlider sliderNombre = new JSlider(0, 1000, 150);
         sliderNombre.addChangeListener(controller.createSliderNombreListener());
@@ -38,6 +39,12 @@ public class ControlPanel extends JPanel {
         personnaliserSlider(sliderBleu, 25, 5);
         panelCouleur.add(sliderBleu);
 
+        sliderNombre.setName("nombreBoules");
+        sliderVitesse.setName("vitesseBoules");
+        sliderRouge.setName("rouge");
+        sliderVert.setName("vert");
+        sliderBleu.setName("bleu");
+        
         add(sliderNombre);
         add(sliderVitesse);
         add(creerPanneauImage(controller));
@@ -69,6 +76,8 @@ public class ControlPanel extends JPanel {
         labelTable.put(10, creerLabelCouleur(Color.MAGENTA));
 
         JSlider sliderImage = new JSlider(1, 10, 5);
+        sliderImage.setName("imageBoules");
+
         sliderImage.setMajorTickSpacing(1);
         sliderImage.setPaintTicks(true);
         sliderImage.setPaintLabels(true);

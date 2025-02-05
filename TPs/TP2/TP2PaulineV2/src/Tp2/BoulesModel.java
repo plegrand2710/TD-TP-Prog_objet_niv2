@@ -70,4 +70,12 @@ public class BoulesModel {
             boule.deplacer(dim, vitesse);
         }
     }
+
+    public int getVitesseBoules() {
+        return vitesse;
+    }
+
+    public int getImage() {
+        return currentImageIndex;
+    }
 }

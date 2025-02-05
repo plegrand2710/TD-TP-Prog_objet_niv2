@@ -102,4 +102,28 @@ public class BoulesController {
         model.miseAJourBoules(dim);
         view.repaint();
     }
+    
+    public int getNombreBoules() {
+        return model.getNombreBoules();
+    }
+
+    public int getVitesseBoules() {
+        return model.getVitesseBoules();
+    }
+
+    public int getImage() {
+        return model.getImage();
+    }
+
+    public int getBackgroundRouge() {
+        return view.getBackground().getRed() * 100 / 255;
+    }
+
+    public int getBackgroundVert() {
+        return view.getBackground().getGreen() * 100 / 255;
+    }
+
+    public int getBackgroundBleu() {
+        return view.getBackground().getBlue() * 100 / 255;
+    }
 }

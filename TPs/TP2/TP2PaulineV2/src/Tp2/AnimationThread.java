@@ -2,9 +2,12 @@ package Tp2;
 
 import java.awt.Dimension;
 
+import javax.swing.SwingUtilities;
+
 public class AnimationThread extends Thread {
     private BoulesController controller;
     private PanneauBoules view;
+    private volatile boolean running = true; 
 
     public AnimationThread(BoulesController controller, PanneauBoules view) {
         this.controller = controller;
@@ -13,13 +16,30 @@ public class AnimationThread extends Thread {
 
     @Override
     public void run() {
-        while (true) {
-            controller.miseAJourBoules(view.getSize());
+        while (running) {
+            Dimension size = view.getSize();
+            
+            SwingUtilities.invokeLater(() -> {
+                controller.miseAJourBoules(size);
+                view.repaint();
+            });
+
             try {
-                Thread.sleep(16);
+                Thread.sleep(16); 
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
+        }
+    }
+    
+    public void stopAnimation() {
+        running = false;
+    }
+    
+    public void resumeAnimation() {
+        if (!running) {
+            running = true;
+            new Thread(this).start(); 
         }
     }
 }
