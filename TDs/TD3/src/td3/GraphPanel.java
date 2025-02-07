@@ -1,68 +1,93 @@
 package td3;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.image.BufferedImage;
+import java.util.List;
 
 public class GraphPanel extends JPanel {
-    public GraphPanel() {
+    private BufferedImage canvas;
+    private PolynomialManager polyManager;
+    
+    // Bornes par défaut
+    private double xMin = -10, xMax = 10, yMin = -10, yMax = 10;
+    
+    // Espacements pour les graduations (en unités mathématiques)
+    private double xMinorSpacing = 1, xMajorSpacing = 5;
+    private double yMinorSpacing = 1, yMajorSpacing = 5;
+    
+    // Point mis en surbrillance lors du survol de la souris
+    private Point highlightedPoint = null;
+    
+    public GraphPanel(PolynomialManager polyManager) {
+        this.polyManager = polyManager;
         setBackground(Color.WHITE);
+        // Recréer le canvas lors du redimensionnement
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                render();
+                repaint();
+            }
+        });
     }
-
+    
+    // Mise à jour des bornes
+    public void setBoundsParameters(double xMin, double xMax, double yMin, double yMax) {
+        this.xMin = xMin;
+        this.xMax = xMax;
+        this.yMin = yMin;
+        this.yMax = yMax;
+    }
+    
+    // Mise à jour des espacements
+    public void setSpacingParameters(double xMinor, double xMajor, double yMinor, double yMajor) {
+        this.xMinorSpacing = xMinor;
+        this.xMajorSpacing = xMajor;
+        this.yMinorSpacing = yMinor;
+        this.yMajorSpacing = yMajor;
+    }
+    
+    // Getters pour les bornes (pour l'interaction avec la souris)
+    public double getXMin() { return xMin; }
+    public double getXMax() { return xMax; }
+    public double getYMin() { return yMin; }
+    public double getYMax() { return yMax; }
+    
+    // Setter pour le point survolé
+    public void setHighlightedPoint(Point p) {
+        highlightedPoint = p;
+    }
+    
+    // Crée et met à jour le canvas via GraphRenderer
+    public void render() {
+        if(getWidth() <= 0 || getHeight() <= 0) return;
+        canvas = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+        GraphRenderer renderer = new GraphRenderer(
+                xMin, xMax, yMin, yMax,
+                getWidth(), getHeight(),
+                xMinorSpacing, xMajorSpacing,
+                yMinorSpacing, yMajorSpacing);
+        List<Polynomial> polys = polyManager.getPolynomials();
+        renderer.render(canvas, polys);
+    }
+    
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        int width = getWidth();
-        int height = getHeight();
-
-        int midX = width / 2;
-        int midY = height / 2;
-
-        g2d.setColor(Color.BLACK);
-        g2d.setStroke(new BasicStroke(2));
-        g2d.drawLine(0, midY, width, midY);
-        g2d.drawLine(midX, 0, midX, height); 
-
-        int scale = 50;
-        int minorTickLength = 5;
-        int majorTickLength = 10;
-        int majorTickInterval = 5; 
-
-        for (int x = midX; x <= width; x += scale) {
-            int unit = (x - midX) / scale;
-            int tickSize = (unit % majorTickInterval == 0) ? majorTickLength : minorTickLength;
-            g2d.drawLine(x, midY - tickSize, x, midY + tickSize);
+        if (canvas == null) {
+            render();
         }
-        for (int x = midX; x >= 0; x -= scale) {
-            int unit = (midX - x) / scale;
-            int tickSize = (unit % majorTickInterval == 0) ? majorTickLength : minorTickLength;
-            g2d.drawLine(x, midY - tickSize, x, midY + tickSize);
-        }
-
-        for (int y = midY; y <= height; y += scale) {
-            int unit = (y - midY) / scale;
-            int tickSize = (unit % majorTickInterval == 0) ? majorTickLength : minorTickLength;
-            g2d.drawLine(midX - tickSize, y, midX + tickSize, y);
-        }
-        for (int y = midY; y >= 0; y -= scale) {
-            int unit = (midY - y) / scale;
-            int tickSize = (unit % majorTickInterval == 0) ? majorTickLength : minorTickLength;
-            g2d.drawLine(midX - tickSize, y, midX + tickSize, y);
-        }
-
-        g2d.setColor(Color.RED);
-        int prevX = 0, prevY = midY;
-        for (int x = 0; x < width; x++) {
-            double normX = (x - midX) / (double) scale;
-            double normY = normX * normX;  
-            int y = midY - (int) (normY * scale);
-            if (x > 0) {
-                g2d.drawLine(prevX, prevY, x, y);
-            }
-            prevX = x;
-            prevY = y;
+        g.drawImage(canvas, 0, 0, null);
+        // Si un point est survolé, le dessiner
+        if (highlightedPoint != null) {
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setColor(Color.MAGENTA);
+            g2d.setStroke(new BasicStroke(2));
+            int proximity = 7;
+            g2d.drawOval(highlightedPoint.x - proximity, highlightedPoint.y - proximity, proximity * 2, proximity * 2);
+            g2d.dispose();
         }
     }
 }

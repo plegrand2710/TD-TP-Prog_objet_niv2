@@ -13,8 +13,9 @@ public class StylePanel extends JPanel {
         setLayout(new BorderLayout());
         setBorder(BorderFactory.createTitledBorder("Style et Couleur de la courbe"));
 
+        // Boutons radio pour le style
         JPanel styleSelectionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        lineButton = new JRadioButton("Ligne", true);
+        lineButton = new JRadioButton("Linéaire", true);
         pointsButton = new JRadioButton("Points");
         crossButton = new JRadioButton("Croix");
 
@@ -28,6 +29,7 @@ public class StylePanel extends JPanel {
         styleSelectionPanel.add(crossButton);
         add(styleSelectionPanel, BorderLayout.NORTH);
 
+        // Sliders pour la couleur (RGB)
         JPanel colorPanel = new JPanel(new GridLayout(3, 2, 5, 5));
         colorPanel.setBorder(BorderFactory.createTitledBorder("Couleur (RGB)"));
 
@@ -50,10 +52,10 @@ public class StylePanel extends JPanel {
     }
 
     public String getSelectedStyle() {
-        if (lineButton.isSelected()) return "Ligne";
+        if (lineButton.isSelected()) return "Linéaire";
         if (pointsButton.isSelected()) return "Points";
         if (crossButton.isSelected()) return "Croix";
-        return "Ligne"; 
+        return "Linéaire";
     }
 
     public void reset() {
