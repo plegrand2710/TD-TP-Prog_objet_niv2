@@ -10,20 +10,16 @@ public class GraphPanel extends JPanel {
     private BufferedImage canvas;
     private PolynomialManager polyManager;
     
-    // Bornes par défaut
     private double xMin = -10, xMax = 10, yMin = -10, yMax = 10;
     
-    // Espacements pour les graduations (en unités mathématiques)
     private double xMinorSpacing = 1, xMajorSpacing = 5;
     private double yMinorSpacing = 1, yMajorSpacing = 5;
     
-    // Point mis en surbrillance lors du survol de la souris
     private Point highlightedPoint = null;
     
     public GraphPanel(PolynomialManager polyManager) {
         this.polyManager = polyManager;
         setBackground(Color.WHITE);
-        // Recréer le canvas lors du redimensionnement
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -33,7 +29,6 @@ public class GraphPanel extends JPanel {
         });
     }
     
-    // Mise à jour des bornes
     public void setBoundsParameters(double xMin, double xMax, double yMin, double yMax) {
         this.xMin = xMin;
         this.xMax = xMax;
@@ -41,7 +36,6 @@ public class GraphPanel extends JPanel {
         this.yMax = yMax;
     }
     
-    // Mise à jour des espacements
     public void setSpacingParameters(double xMinor, double xMajor, double yMinor, double yMajor) {
         this.xMinorSpacing = xMinor;
         this.xMajorSpacing = xMajor;
@@ -49,18 +43,15 @@ public class GraphPanel extends JPanel {
         this.yMajorSpacing = yMajor;
     }
     
-    // Getters pour les bornes (pour l'interaction avec la souris)
     public double getXMin() { return xMin; }
     public double getXMax() { return xMax; }
     public double getYMin() { return yMin; }
     public double getYMax() { return yMax; }
     
-    // Setter pour le point survolé
     public void setHighlightedPoint(Point p) {
         highlightedPoint = p;
     }
     
-    // Crée et met à jour le canvas via GraphRenderer
     public void render() {
         if(getWidth() <= 0 || getHeight() <= 0) return;
         canvas = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -80,7 +71,6 @@ public class GraphPanel extends JPanel {
             render();
         }
         g.drawImage(canvas, 0, 0, null);
-        // Si un point est survolé, le dessiner
         if (highlightedPoint != null) {
             Graphics2D g2d = (Graphics2D) g.create();
             g2d.setColor(Color.MAGENTA);

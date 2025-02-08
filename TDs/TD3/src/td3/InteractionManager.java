@@ -10,7 +10,7 @@ public class InteractionManager {
     private GraphPanel graphPanel;
     private PolynomialManager polyManager;
     private JLabel coordLabel;
-    private final int proximity = 7; // Seuil en pixels
+    private final int proximity = 7; 
 
     public InteractionManager(GraphPanel graphPanel, PolynomialManager polyManager, JLabel coordLabel) {
         this.graphPanel = graphPanel;
@@ -31,7 +31,6 @@ public class InteractionManager {
     private void handleMouseMove(MouseEvent e) {
         Point mousePoint = e.getPoint();
         Point nearestPoint = null;
-        // Parcours de tous les points de tous les polynômes
         for (Polynomial poly : polyManager.getPolynomials()) {
             List<Point> points = poly.getComputedPoints();
             for (Point p : points) {
@@ -44,7 +43,6 @@ public class InteractionManager {
         }
         
         if (nearestPoint != null) {
-            // Conversion pixel -> coordonnées mathématiques
             double xMin = graphPanel.getXMin();
             double xMax = graphPanel.getXMax();
             double yMin = graphPanel.getYMin();

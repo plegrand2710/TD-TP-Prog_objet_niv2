@@ -15,7 +15,8 @@ public class ControlPanel extends JPanel {
     
     private JComboBox<String> presetComboBox;
     
-    // Champs pour les espacements
+    private JTextField thicknessField;
+    
     private JTextField xMinorField, xMajorField, yMinorField, yMajorField;
     
     private StylePanel stylePanel;
@@ -34,12 +35,12 @@ public class ControlPanel extends JPanel {
         addPresetSelection();
         addCoefficientInput();
         addBoundsParameters();
+        addThicknessParameter();
         addSpacingParameters();
         addStylePanel();
         addButtons();
     }
     
-    // Slider pour choisir le degré (entre 1 et 10)
     private void addDegreeSlider() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Degré du polynôme"));
@@ -52,7 +53,6 @@ public class ControlPanel extends JPanel {
         add(panel);
     }
     
-    // Menu déroulant pour sélectionner un polynôme prédéfini
     private void addPresetSelection() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Polynômes prédéfinis"));
@@ -66,14 +66,11 @@ public class ControlPanel extends JPanel {
             String selected = (String) presetComboBox.getSelectedItem();
             if (!"Sélectionnez...".equals(selected)) {
                 double[] coeffs = presets.get(selected);
-                // Ajuste le slider selon le degré (coeffs.length - 1)
                 degreeSlider.setValue(coeffs.length - 1);
                 updateCoefficientFields();
-                // Remplit automatiquement les champs avec les coefficients prédéfinis
                 for (int i = 0; i < coeffs.length; i++) {
                     coefficientFields[i].setText(String.valueOf(coeffs[i]));
                 }
-                // Appel immédiat à la validation pour afficher le polynôme
                 onValidate();
             }
         });
@@ -81,7 +78,6 @@ public class ControlPanel extends JPanel {
         add(panel);
     }
     
-    // Création dynamique des champs de saisie pour les coefficients
     private void addCoefficientInput() {
         coefficientsPanel = new JPanel();
         coefficientsPanel.setLayout(new GridLayout(0, 2, 5, 5));
@@ -97,7 +93,6 @@ public class ControlPanel extends JPanel {
         add(coefficientsPanel);
     }
     
-    // Mise à jour dynamique des champs de coefficient lorsque le degré change
     private void updateCoefficientFields() {
         coefficientsPanel.removeAll();
         int degree = degreeSlider.getValue();
@@ -112,7 +107,6 @@ public class ControlPanel extends JPanel {
         coefficientsPanel.repaint();
     }
     
-    // Saisie des bornes d'affichage
     private void addBoundsParameters() {
         JPanel panel = new JPanel(new GridLayout(4, 2, 5, 5));
         panel.setBorder(BorderFactory.createTitledBorder("Paramètres des bornes"));
@@ -131,7 +125,17 @@ public class ControlPanel extends JPanel {
         add(panel);
     }
     
-    // Ajoute les paramètres d'espacement pour les graduations
+    // Ajout du panneau pour définir l'épaisseur du trait pour la prochaine courbe
+    private void addThicknessParameter() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panel.setBorder(BorderFactory.createTitledBorder("Paramètres de la courbe"));
+        panel.add(new JLabel("Épaisseur du trait:"));
+        thicknessField = new JTextField("2", 5);
+        panel.add(thicknessField);
+        add(panel);
+    }
+    
+    // Ajout des paramètres d'espacement pour les graduations
     private void addSpacingParameters() {
         JPanel panel = new JPanel(new GridLayout(4, 2, 5, 5));
         panel.setBorder(BorderFactory.createTitledBorder("Paramètres d'espacement"));
@@ -164,7 +168,7 @@ public class ControlPanel extends JPanel {
         panel.add(validateButton);
         panel.add(resetButton);
         
-        // La validation crée le polynôme, met à jour les bornes et espacements, puis déclenche le rendu
+        // Lors de la validation, on crée le polynôme (avec épaisseur personnalisée), met à jour les bornes et espacements, puis déclenche le rendu
         validateButton.addActionListener(e -> onValidate());
         resetButton.addActionListener(e -> onReset());
         
@@ -198,12 +202,20 @@ public class ControlPanel extends JPanel {
             double yMajor = Double.parseDouble(yMajorField.getText());
             graphPanel.setSpacingParameters(xMinor, xMajor, yMinor, yMajor);
             
-            // Récupération du style et de la couleur
+            // Récupération du style et de la couleur depuis StylePanel
             String style = stylePanel.getSelectedStyle();
             Color color = stylePanel.getSelectedColor();
             
-            // Création du polynôme et ajout au gestionnaire
-            Polynomial poly = new Polynomial(coeffs, color, style);
+            // Récupération de l'épaisseur pour la prochaine courbe
+            int thickness;
+            try {
+                thickness = Integer.parseInt(thicknessField.getText());
+            } catch (NumberFormatException ex) {
+                thickness = 2;
+            }
+            
+            // Création du polynôme avec tous les paramètres et ajout au gestionnaire
+            Polynomial poly = new Polynomial(coeffs, color, style, thickness);
             polyManager.addPolynomial(poly);
             
             // Mise à jour immédiate du rendu graphique
@@ -221,6 +233,7 @@ public class ControlPanel extends JPanel {
         xMaxField.setText("10");
         yMinField.setText("-10");
         yMaxField.setText("10");
+        thicknessField.setText("2");
         xMinorField.setText("1");
         xMajorField.setText("5");
         yMinorField.setText("1");
