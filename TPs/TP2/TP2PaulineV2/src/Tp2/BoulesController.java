@@ -11,7 +11,7 @@ public class BoulesController {
     private PanneauBoules view;
 
     public BoulesController(BoulesModel model, PanneauBoules view) {
-        this.model = model;
+        this.setModel(model);
         this.view = view;
     }
 
@@ -76,16 +76,16 @@ public class BoulesController {
     }
 
     public void setNombreBoules(int nombre) {
-        model.setNombreBoules(nombre);
+        getModel().setNombreBoules(nombre);
         view.repaint();
     }
 
     public void setVitesseBoules(int vitesse) {
-        model.setVitesseBoules(vitesse);
+        getModel().setVitesseBoules(vitesse);
     }
 
     public void setImage(int index) {
-        model.setImage(index);
+        getModel().setImage(index);
         view.repaint();
     }
 
@@ -99,20 +99,20 @@ public class BoulesController {
     }
 
     public void miseAJourBoules(Dimension dim) {
-        model.miseAJourBoules(dim);
+        getModel().miseAJourBoules(dim);
         view.repaint();
     }
     
     public int getNombreBoules() {
-        return model.getNombreBoules();
+        return getModel().getNombreBoules();
     }
 
     public int getVitesseBoules() {
-        return model.getVitesseBoules();
+        return getModel().getVitesseBoules();
     }
 
     public int getImage() {
-        return model.getImage();
+        return getModel().getImage();
     }
 
     public int getBackgroundRouge() {
@@ -126,4 +126,12 @@ public class BoulesController {
     public int getBackgroundBleu() {
         return view.getBackground().getBlue() * 100 / 255;
     }
+
+	public BoulesModel getModel() {
+		return model;
+	}
+
+	public void setModel(BoulesModel model) {
+		this.model = model;
+	}
 }

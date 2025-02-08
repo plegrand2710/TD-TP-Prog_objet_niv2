@@ -20,9 +20,24 @@ public class Boule {
     public void deplacer(Dimension dim, int vitesse) {
         x += vx * vitesse / 10.0;
         y += vy * vitesse / 10.0;
+        
+        int diameter = 20;
 
-        if (x < 0 || x > dim.width) vx = -vx;
-        if (y < 0 || y > dim.height) vy = -vy;
+        if (x < 0) {
+            x = 0;
+            vx = -vx;
+        } else if (x > dim.width - diameter) {
+            x = dim.width - diameter;
+            vx = -vx;
+        }
+
+        if (y < 0) {
+            y = 0;
+            vy = -vy;
+        } else if (y > dim.height - diameter) {
+            y = dim.height - diameter;
+            vy = -vy;
+        }
     }
 
     public double getX() {

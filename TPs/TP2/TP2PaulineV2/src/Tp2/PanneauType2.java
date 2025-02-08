@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
+import java.util.Map;
 
 public class PanneauType2 extends JPanel {
     private JRadioButton[] boutonsRadio;
@@ -98,15 +99,30 @@ public class PanneauType2 extends JPanel {
     
     private JPanel creerPanelAvecThread(String texte) {
         JPanel panel = new JPanel(new BorderLayout()); 
-        panel.setBackground(Color.LIGHT_GRAY);
         panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
         caseToRadioButtonMap.put(panel, null); 
 
         BoulesModel model = new BoulesModel();
+        
+        int nbBoules = (int) (Math.random() * 100) + 50;     
+        model.setNombreBoules(nbBoules);
+        
+        int vitesse = (int) (Math.random() * 100) + 10;       
+        model.setVitesseBoules(vitesse);
+        
+        int imageIndex = (int) (Math.random() * 10) + 1;        
+        model.setImage(imageIndex);
+                
+        
         PanneauBoules view = new PanneauBoules(model);
+        view.setBackground(new Color((int)(Math.random()*256),
+                (int)(Math.random()*256),
+                (int)(Math.random()*256)));
         BoulesController controller = new BoulesController(model, view);
+        
         AnimationThread thread = new AnimationThread(controller, view);
+        thread.setName("Thread " + texte);
 
         caseToThreadMap.put(panel, thread);
         caseToViewMap.put(panel, view);
@@ -117,20 +133,16 @@ public class PanneauType2 extends JPanel {
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-
                 if (caseToRadioButtonMap.containsKey(panel) && caseToRadioButtonMap.get(panel) != null) {
                     caseToRadioButtonMap.get(panel).setSelected(true);
-
                     SwingUtilities.invokeLater(() -> {
                         caseToRadioButtonMap.get(panel).revalidate();
                         caseToRadioButtonMap.get(panel).repaint();
                     });
                 }
-
                 SwingUtilities.invokeLater(() -> {
                     mettreAJourSelectionCase(panel);
                 });
-
                 SwingUtilities.invokeLater(() -> {
                     AnimationThread selectedThread = caseToThreadMap.get(panel);
                     if (selectedThread != null && !selectedThread.isAlive()) {
@@ -271,5 +283,25 @@ public class PanneauType2 extends JPanel {
                 trouverSliders((JComponent) comp, slidersTrouves);
             }
         }
+    }
+    
+    public BoulesController getSelectedController() {
+        for (Map.Entry<JPanel, JRadioButton> entry : caseToRadioButtonMap.entrySet()) {
+            JRadioButton radio = entry.getValue();
+            if (radio != null && radio.isSelected()) {
+                return caseToControllerMap.get(entry.getKey());
+            }
+        }
+        return null;
+    }
+    
+    public AnimationThread getSelectedThread() {
+        for (Map.Entry<JPanel, JRadioButton> entry : caseToRadioButtonMap.entrySet()) {
+             JRadioButton radio = entry.getValue();
+             if (radio != null && radio.isSelected()) {
+                 return caseToThreadMap.get(entry.getKey());
+             }
+        }
+        return null;
     }
 }
