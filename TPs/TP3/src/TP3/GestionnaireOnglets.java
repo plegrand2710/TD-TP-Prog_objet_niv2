@@ -75,18 +75,38 @@ public class GestionnaireOnglets extends JFrame {
             JFileChooser chooser = new JFileChooser();
             if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 File file = chooser.getSelectedFile();
+                if (!file.getName().toLowerCase().endsWith(".txt")) {
+                    file = new File(file.getParentFile(), file.getName() + ".txt");
+                }
                 if (file.exists()) {
-                    int rep = JOptionPane.showConfirmDialog(this, 
-                        "Le fichier existe déjà. Voulez-vous l'écraser ?", 
-                        "Confirmer", 
-                        JOptionPane.YES_NO_OPTION);
+                    int rep = JOptionPane.showConfirmDialog(this,
+                            "Le fichier existe déjà. Voulez-vous l'écraser ?",
+                            "Confirmer",
+                            JOptionPane.YES_NO_OPTION);
                     if (rep != JOptionPane.YES_OPTION) {
                         return; 
                     }
                 }
-                try (FileOutputStream fos = new FileOutputStream(file);
-                     ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-                    oos.writeObject(vue.getModele());
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                    writer.write("TYPE,EP,REMPLI,COLOR,POINTS");
+                    writer.newLine();
+                    for (Forme f : vue.getModele().getFormes()) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append(f.getOutil().toString()).append(",");
+                        sb.append(f.getEpaisseur()).append(",");
+                        sb.append(f.getRempli()).append(",");
+                        sb.append(colorToHex(f.getCouleur())).append(",");
+                        for (int i = 0; i < f.getPoints().size(); i++) {
+                            Point p = f.getPoints().get(i);
+                            sb.append(p.x).append(";").append(p.y);
+                            if (i < f.getPoints().size() - 1) {
+                                sb.append("|");
+                            }
+                        }
+                        writer.write(sb.toString());
+                        writer.newLine();
+                    }
+                    writer.flush();
                     JOptionPane.showMessageDialog(this, "Dessin sauvegardé avec succès !");
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -96,6 +116,9 @@ public class GestionnaireOnglets extends JFrame {
         }
     }
 
+    private String colorToHex(Color color) {
+        return String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
+    }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
