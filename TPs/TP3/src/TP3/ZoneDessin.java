@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 public class ZoneDessin extends JPanel {
 
     private ModeleDessin modele;
-    private Forme formeEnCours; // forme en cours de dessin
+    private Forme formeEnCours; 
 
     public ZoneDessin(ModeleDessin modele) {
         this.modele = modele;
@@ -20,7 +20,6 @@ public class ZoneDessin extends JPanel {
         this.modele = modele;
     }
 
-    // Permet de définir la forme en cours et de rafraîchir l'affichage
     public void setFormeEnCours(Forme f) {
         this.formeEnCours = f;
         repaint();
@@ -33,18 +32,15 @@ public class ZoneDessin extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
         ArrayList<Forme> formes = modele.getFormes();
 
-        // Dessiner les formes enregistrées dans le modèle
         for (Forme f : formes) {
             dessinerForme(g2, f);
         }
 
-        // Dessiner la forme en cours si elle existe
         if (formeEnCours != null) {
             dessinerForme(g2, formeEnCours);
         }
     }
 
-    // Méthode utilitaire pour dessiner une forme
     private void dessinerForme(Graphics2D g2, Forme f) {
         g2.setColor(f.getCouleur());
         g2.setStroke(new BasicStroke(f.getEpaisseur()));
@@ -66,7 +62,6 @@ public class ZoneDessin extends JPanel {
 
             case RECTANGLE:
                 if (pts.size() >= 2) {
-                    // Interpréter pts.get(0) comme le centre
                     Point center = pts.get(0);
                     Point current = pts.get(1);
                     int dx = Math.abs(current.x - center.x);
@@ -85,12 +80,10 @@ public class ZoneDessin extends JPanel {
 
             case CERCLE:
                 if (pts.size() >= 2) {
-                    // Interpréter pts.get(0) comme le centre
                     Point center = pts.get(0);
                     Point current = pts.get(1);
                     int dx = Math.abs(current.x - center.x);
                     int dy = Math.abs(current.y - center.y);
-                    // Calculer le rayon en fonction de la distance euclidienne
                     int radius = (int) Math.hypot(dx, dy);
                     int topLeftX = center.x - radius;
                     int topLeftY = center.y - radius;
