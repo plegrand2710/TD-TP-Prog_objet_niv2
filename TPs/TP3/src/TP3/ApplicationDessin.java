@@ -4,9 +4,6 @@ import javax.swing.SwingUtilities;
 
 public class ApplicationDessin {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            ModeleDessin modele = new ModeleDessin();
-            new VueDessin(modele);
-        });
+        SwingUtilities.invokeLater(() -> new GestionnaireOnglets());
     }
 }

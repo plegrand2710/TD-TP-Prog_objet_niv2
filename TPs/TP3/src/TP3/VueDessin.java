@@ -17,7 +17,7 @@ import javax.swing.JColorChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
-public class VueDessin extends JFrame {
+public class VueDessin extends JPanel {
 
     private ModeleDessin modele;
     private ControleurDessin controleur;
@@ -43,8 +43,6 @@ public class VueDessin extends JFrame {
     public VueDessin(ModeleDessin modele) {
         this.modele = modele;
         outilSelectionne = OutilDessin.PINCEAUX;
-        setTitle("Application de Dessin");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
         initComponents();
         setVisible(true);
@@ -178,8 +176,8 @@ public class VueDessin extends JFrame {
         zoneDessin = new ZoneDessin(modele);
         zoneDessin.setBackground(modele.getCouleurFond());
         
-        getContentPane().add(panneauGauche, BorderLayout.WEST);
-        getContentPane().add(zoneDessin, BorderLayout.CENTER);
+        add(panneauGauche, BorderLayout.WEST);
+        add(zoneDessin, BorderLayout.CENTER);
         
         controleur = new ControleurDessin(modele, this);
         zoneDessin.addMouseListener(controleur);
@@ -280,5 +278,9 @@ public class VueDessin extends JFrame {
             ModeleDessin modele = new ModeleDessin();
             new VueDessin(modele);
         });
+    }
+    
+    public ModeleDessin getModele() {
+        return this.modele;
     }
 }
